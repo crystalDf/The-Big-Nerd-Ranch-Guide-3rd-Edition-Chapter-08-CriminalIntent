@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,6 +17,9 @@ import java.util.List;
 
 
 public class CrimeListFragment extends Fragment {
+
+    public static final int REQUIRES_POLICE = 1;
+    public static final int NOT_REQUIRES_POLICE = 0;
 
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mCrimeAdapter;
@@ -48,9 +52,10 @@ public class CrimeListFragment extends Fragment {
         private TextView mTitleTextView;
         private CheckBox mSolvedCheckBox;
         private TextView mDateTextView;
+        private Button mRequiresPoliceButton;
 
-        public CrimeHolder(LayoutInflater inflater, ViewGroup container) {
-            super(inflater.inflate(R.layout.list_item_crime, container, false));
+        public CrimeHolder(View itemView) {
+            super(itemView);
 
             itemView.setOnClickListener(v -> Toast.makeText(getActivity(),
                     mCrime.getTitle() + " clicked!", Toast.LENGTH_LONG).show());
@@ -58,6 +63,12 @@ public class CrimeListFragment extends Fragment {
             mTitleTextView = itemView.findViewById(R.id.list_item_crime_title_text_view);
             mSolvedCheckBox = itemView.findViewById(R.id.list_item_crime_solved_check_box);
             mDateTextView = itemView.findViewById(R.id.list_item_crime_date_text_view);
+            mRequiresPoliceButton = itemView.findViewById(R.id.list_item_crime_requires_police_button);
+
+            if (mRequiresPoliceButton != null) {
+                mRequiresPoliceButton.setOnClickListener(v -> Toast.makeText(getActivity(),
+                        mCrime.getTitle() + " requires police!", Toast.LENGTH_LONG).show());
+            }
         }
 
         public void bindCrime(Crime crime) {
@@ -80,7 +91,21 @@ public class CrimeListFragment extends Fragment {
         public CrimeHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
 
-            return new CrimeHolder(layoutInflater, parent);
+            View itemView = null;
+
+            switch (viewType) {
+                case REQUIRES_POLICE:
+                    itemView = layoutInflater.inflate(R.layout.list_item_crime_requires_police,
+                            parent, false);
+                    break;
+                case NOT_REQUIRES_POLICE:
+                    itemView = layoutInflater.inflate(R.layout.list_item_crime, parent, false);
+                    break;
+                default:
+                    break;
+            }
+
+            return new CrimeHolder(itemView);
         }
 
         @Override
@@ -92,6 +117,12 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCrimes.size();
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            Crime crime = mCrimes.get(position);
+            return crime.isRequiresPolice() ? REQUIRES_POLICE : NOT_REQUIRES_POLICE;
         }
     }
 }
